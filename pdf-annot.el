@@ -1669,9 +1669,9 @@ belong to the same page and A1 is displayed above/left of A2."
           (with-current-buffer buffer
             (setq pdf-annot-list-buffer list-buffer))))
       (run-mode-hooks)
-      (switch-to-buffer
+      (pop-to-buffer
        (current-buffer)
-       )
+       pdf-annot-list-display-buffer-action)
       (tablist-move-to-major-column)
       (tablist-display-context-window))
     (add-hook 'pdf-info-close-document-hook
@@ -1764,9 +1764,9 @@ belong to the same page and A1 is displayed above/left of A2."
               (when (buffer-live-p buffer)
                 (with-selected-window
                     (or (get-buffer-window buffer)
-                        (switch-to-buffer
+                        (display-buffer
                          buffer
-			 ))
+                         '(nil (inhibit-same-window . t))))
                   (pdf-annot-show-annotation a t))))
             pdf-annot-list-document-buffer
             (pdf-annot-getannot id pdf-annot-list-document-buffer)))))
