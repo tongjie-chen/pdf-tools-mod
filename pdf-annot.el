@@ -1512,8 +1512,9 @@ annotation's contents and otherwise `text-mode'. "
 (defcustom pdf-annot-list-format
   '((page . 3)
     (type . 10)
-    (label . 24)
-    (date . 24))
+    (label . 20)
+    (date . 24)
+    (text . 25))
   "Annotation properties visible in the annotation list.
 
 It should be a list of \(PROPERTIZE. WIDTH\), where PROPERTY is a
@@ -1597,6 +1598,8 @@ belong to the same page and A1 is displayed above/left of A2."
         (page (pdf-annot-print-property a 'page))
         (label (funcall prune-newlines
                         (pdf-annot-print-property a 'label)))
+	(text (funcall prune-newlines
+		       (my-pdf-annot-gettext a)))
         (contents
          (truncate-string-to-width
           (funcall prune-newlines
@@ -1790,8 +1793,8 @@ belong to the same page and A1 is displayed above/left of A2."
 ;;; pdf-annot.el ends here
 ;; Modification to get text of the highlighted annotation
 
-(defun my-pdf-annot-gettex (a)
-  let (edges (pdf-annot-get a 'edges))
-	     pdf-info-gettext (a edges)
-	     )
-  )
+(defun my-pdf-annot-gettext (a)
+  (let* ((page (pdf-annot-get a 'page))
+ 	 (edges (pdf-annot-get a 'edges)))
+  (pdf-info-gettext page edges 'line pdf-annot-list-document-buffer)))
+
