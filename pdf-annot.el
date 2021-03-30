@@ -1788,3 +1788,10 @@ belong to the same page and A1 is displayed above/left of A2."
 
 (provide 'pdf-annot)
 ;;; pdf-annot.el ends here
+;; Modification to get text of the highlighted annotation
+
+(defun my-pdf-annot-gettex (a)
+  let (edges (pdf-annot-get a 'edges))
+	     pdf-info-gettext (a edges)
+	     )
+  )
