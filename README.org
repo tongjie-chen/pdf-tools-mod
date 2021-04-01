@@ -11,7 +11,7 @@ The files here are my package folder.
 ** Fix annotation place mismatch
    From poppler 0.86, the highlighted region will be different than actual highlighted area shown in PDF files.
 
-   On Woindows, I used poppler 0.85 in Mingw to compile epdfinfo and attach related files here.
+   On Windows, I used poppler 0.85 in Mingw to compile epdfinfo and attach related files here.
 
    In Linux I compiled epdfinfo with 0.84 and put those lib.so files to a directory and used "export LD_LIBRARY_PATH=" to load them before executing Emacs or Emacsclient.
 
@@ -19,7 +19,8 @@ The files here are my package folder.
 
 ** Show highlighted text in pdf-annot-list
    The changes are in pdf-annot.el. Adding a function to extract the highlighted text including thanks to "org-noter--pdf-tools-edges-to-region" borrowed from org-noter. Also word break at end of PDF lines removed to increase legibility.
-   
+
+   You will need to customize variable pdf-annot-list-format. Add "text" as symbol and value of a width such as 20. Remove other symbols such as type or label may create some issues.
 ** Annotation editor in orgmode
    I modded the mode to make it use orgmode to edit, thus hyperlinks can be used.
 
@@ -28,10 +29,12 @@ The files here are my package folder.
 ** pdf-occur default to occur selected text
    If you don't input any text in pdf-occur but selected a region of text, it will occur those text. But work needed to be done to show in the prompt.
 
-** TODO Thumbnails with Evince
-   I tried to modify pdf-view-goto-page to make it show file simutaneously in Evince, but Evince will always pop up to grab window focus.
+** TODO Thumbnails with Evince - WIP
+   I tried to modify pdf-view-goto-page to make it show file simultaneously in Evince, but Evince will always pop up to grab window focus.
 
-** TODO Click to open a new window for reference
+** TODO Annotation linking
+   This is possible to implement because the annotation has a unique id. May see how org-ref implemented this.
+** TODO Click to open a new window for reference - WIP
    Internal links in PDF should be clicked and open a new window to show the referred place for better reference.
 
 # Local Variables:
