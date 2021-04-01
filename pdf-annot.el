@@ -31,6 +31,7 @@
 (require 'org)   ;; org-create-formula-image
 (require 'tablist)
 (require 'cl-lib)
+(require 'org-noter)
 
 
 ;; * ================================================================== *
