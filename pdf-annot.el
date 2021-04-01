@@ -1389,7 +1389,7 @@ by a header."
     (let ((mode (if (funcall pdf-annot-latex-string-predicate
                              (pdf-annot-get a 'contents))
                     'latex-mode
-                  'text-mode)))
+                  'org-mode)))
       (unless (derived-mode-p mode)
         (funcall mode))))
   "A function for setting up, e.g. the major-mode, of the edit buffer.
@@ -1598,8 +1598,8 @@ belong to the same page and A1 is displayed above/left of A2."
         (page (pdf-annot-print-property a 'page))
         (label (funcall prune-newlines
                         (pdf-annot-print-property a 'label)))
-	(text (funcall prune-newlines
-		       (my-pdf-annot-gettext a)))
+	(text (replace-regexp-in-string  "- " "" (funcall prune-newlines
+		       (my-pdf-annot-gettext a))))
         (contents
          (truncate-string-to-width
           (funcall prune-newlines
@@ -1795,6 +1795,11 @@ belong to the same page and A1 is displayed above/left of A2."
 
 (defun my-pdf-annot-gettext (a)
   (let* ((page (pdf-annot-get a 'page))
- 	 (edges (pdf-annot-get a 'edges)))
-  (pdf-info-gettext page edges 'line pdf-annot-list-document-buffer)))
+         (edges (or (org-noter--pdf-tools-edges-to-region (alist-get 'markup-edges a))
+                    (alist-get 'edges a)))
+ 	 ;; (edges (pdf-annot-get a 'edges))
+	 ;; (id (pdf-annot-get a 'id))
+	 )
+	 ;; (message "id value %s" id)
+  (pdf-info-gettext page edges 'word pdf-annot-list-document-buffer)))
 
