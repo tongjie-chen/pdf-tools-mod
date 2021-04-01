@@ -1528,7 +1528,8 @@ Currently supported properties are page, type, label, date and contents."
              (type (integer :value 10 :tag "Column Width" ))
              (label (integer :value 24 :tag "Column Width"))
              (date (integer :value 24 :tag "Column Width"))
-             (contents (integer :value 56 :tag "Column Width")))
+             (contents (integer :value 56 :tag "Column Width"))
+             (text (integer :value 56 :tag "Column Width")))  
   :group 'pdf-annot)
 
 (defcustom pdf-annot-list-highlight-type nil
@@ -1595,7 +1596,7 @@ belong to the same page and A1 is displayed above/left of A2."
            (lambda (str)
              (replace-regexp-in-string "\n" " " str t t))))
       (cl-ecase entry-type
-        (date (pdf-annot-print-property a 'modified))
+        (date (format-time-string "%Y-%m-%d %a %T" (date-to-time (pdf-annot-print-property a 'modified))))
         (page (pdf-annot-print-property a 'page))
         (label (funcall prune-newlines
                         (pdf-annot-print-property a 'label)))
