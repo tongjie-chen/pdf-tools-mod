@@ -1662,7 +1662,7 @@ belong to the same page and A1 is displayed above/left of A2."
   (pdf-util-assert-pdf-buffer)
   (let ((buffer (current-buffer)))
     (with-current-buffer (get-buffer-create
-                          (format "*%s's annots*"
+                          (format "*%s annots*"
                                   (file-name-sans-extension
                                    (buffer-name))))
       (delay-mode-hooks
@@ -1810,7 +1810,7 @@ belong to the same page and A1 is displayed above/left of A2."
 
 (defun my-pdf-annot-create-link (a)
   (setq id (pdf-annot-get a 'id))
-  (setq pdf-filename (concat (replace-regexp-in-string "'s annots" ""(replace-regexp-in-string "\*" "" (buffer-name))) ".pdf"))
+  (setq pdf-filename (concat (replace-regexp-in-string " annots" ""(replace-regexp-in-string "\*" "" (buffer-name))) ".pdf"))
   ;; (message pdf-filename)
   (setq filename (buffer-file-name (get-file-buffer pdf-filename)))
   ;; (message "id value %s" id)
