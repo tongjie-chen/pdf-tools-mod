@@ -1515,7 +1515,8 @@ annotation's contents and otherwise `text-mode'. "
     (type . 10)
     (label . 20)
     (date . 24)
-    (text . 25))
+    (text . 25)
+    (link . 5))
   "Annotation properties visible in the annotation list.
 
 It should be a list of \(PROPERTIZE. WIDTH\), where PROPERTY is a
@@ -1529,7 +1530,8 @@ Currently supported properties are page, type, label, date and contents."
              (label (integer :value 24 :tag "Column Width"))
              (date (integer :value 24 :tag "Column Width"))
              (contents (integer :value 56 :tag "Column Width"))
-             (text (integer :value 56 :tag "Column Width")))  
+             (text (integer :value 56 :tag "Column Width"))
+	     (link (integer :value 5 :tag "Column Width")))  
   :group 'pdf-annot)
 
 (defcustom pdf-annot-list-highlight-type nil
@@ -1601,7 +1603,8 @@ belong to the same page and A1 is displayed above/left of A2."
         (label (funcall prune-newlines
                         (pdf-annot-print-property a 'label)))
 	(text (replace-regexp-in-string  "- " "" (funcall prune-newlines
-		       (my-pdf-annot-gettext a))))
+							  (my-pdf-annot-gettext a))))
+	(link (replace-regexp-in-string  "\"\"" "\"" (my-pdf-annot-create-link a)))
         (contents
          (truncate-string-to-width
           (funcall prune-newlines
@@ -1805,3 +1808,12 @@ belong to the same page and A1 is displayed above/left of A2."
 	 ;; (message "id value %s" id)
   (pdf-info-gettext page edges 'word pdf-annot-list-document-buffer)))
 
+(defun my-pdf-annot-create-link (a)
+  (setq id (pdf-annot-get a 'id))
+  (setq pdf-filename (concat (replace-regexp-in-string "'s annots" ""(replace-regexp-in-string "\*" "" (buffer-name))) ".pdf"))
+  ;; (message pdf-filename)
+  (setq filename (buffer-file-name (get-file-buffer pdf-filename)))
+  ;; (message "id value %s" id)
+  (concat "[[elisp:(progn (find-file \"" filename "\") (pdf-annot-list-annotations) (pop-to-buffer \"" (buffer-name) "\")(pdf-annot-list-display-annotation-from-id \"" (symbol-name id) "\"))][Link]]")
+ ;; (concat "elisp:(progn (find-file " filename ") (pdf-annot-list-annotations) (pop-to-buffer " (buffer-name) ")(pdf-annot-list-display-annotation-from-id " (symbol-name id) "))")  
+  )
