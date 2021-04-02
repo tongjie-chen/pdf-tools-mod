@@ -1796,6 +1796,7 @@ belong to the same page and A1 is displayed above/left of A2."
 
 (provide 'pdf-annot)
 ;;; pdf-annot.el ends here
+
 ;; Modification to get text of the highlighted annotation
 
 (defun my-pdf-annot-gettext (a)
@@ -1817,3 +1818,63 @@ belong to the same page and A1 is displayed above/left of A2."
   (concat "[[elisp:(progn (find-file \"" filename "\") (pdf-annot-list-annotations) (pop-to-buffer \"" (buffer-name) "\")(pdf-annot-list-display-annotation-from-id \"" (symbol-name id) "\"))][Link]]")
  ;; (concat "elisp:(progn (find-file " filename ") (pdf-annot-list-annotations) (pop-to-buffer " (buffer-name) ")(pdf-annot-list-display-annotation-from-id " (symbol-name id) "))")  
   )
+
+;; Export annotations
+(defcustom pdf-annot-export-format
+  '((page . 3)
+    (type . 10)
+    (label . 20)
+    (date . 24)
+    (text . 25)
+    (link . 5))
+  "Annotation properties visible in the annotation list.
+
+It should be a list of \(PROPERTIZE. WIDTH\), where PROPERTY is a
+symbol naming one of supported properties to list and WIDTH its
+desired column-width.
+
+Currently supported properties are page, type, label, date and contents."
+  :type '(alist :key-type (symbol))
+  :options '((page (integer :value 3 :tag "Column Width"))
+             (type (integer :value 10 :tag "Column Width" ))
+             (label (integer :value 24 :tag "Column Width"))
+             (date (integer :value 24 :tag "Column Width"))
+             (contents (integer :value 56 :tag "Column Width"))
+             (text (integer :value 56 :tag "Column Width"))
+	     (link (integer :value 5 :tag "Column Width")))  
+  :group 'pdf-annot)
+
+(defun pdf-annot-save-annotations ()
+  "List annotations in a dired like buffer.
+
+\\{pdf-annot-list-mode-map}"
+  (interactive)
+  (pdf-util-assert-pdf-buffer)
+  (let ((buffer (current-buffer)))
+    (with-current-buffer (get-buffer-create
+                          (format "*%s annots*"
+                                  (file-name-sans-extension
+                                   (buffer-name))))
+      (delay-mode-hooks
+        (unless (derived-mode-p 'pdf-annot-list-mode)
+          (pdf-annot-list-mode))
+        (setq pdf-annot-list-document-buffer buffer)
+        (tabulated-list-print)
+        (setq tablist-context-window-function
+              (lambda (id) (pdf-annot-list-context-function id buffer))
+              tablist-operations-function 'pdf-annot-list-operation-function)
+        (let ((list-buffer (current-buffer)))
+          (with-current-buffer buffer
+            (setq pdf-annot-list-buffer list-buffer))))
+      (run-mode-hooks)
+      (pop-to-buffer
+       (current-buffer)
+       pdf-annot-list-display-buffer-action)
+      (tablist-move-to-major-column)
+      (tablist-display-context-window)
+      (write-file (concat "/tmp/" (replace-regexp-in-string "\*" "" (buffer-name)) ".org"))
+      )
+    (add-hook 'pdf-info-close-document-hook
+              'pdf-annot-list-update nil t)
+    (add-hook 'pdf-annot-modified-functions
+              'pdf-annot-list-update nil t)))
