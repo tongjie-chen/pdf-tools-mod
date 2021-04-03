@@ -1516,7 +1516,8 @@ annotation's contents and otherwise `text-mode'. "
     (label . 20)
     (date . 24)
     (text . 25)
-    (link . 5))
+    (link . 5)
+    (id . 5))
   "Annotation properties visible in the annotation list.
 
 It should be a list of \(PROPERTIZE. WIDTH\), where PROPERTY is a
@@ -1531,7 +1532,8 @@ Currently supported properties are page, type, label, date and contents."
              (date (integer :value 24 :tag "Column Width"))
              (contents (integer :value 56 :tag "Column Width"))
              (text (integer :value 56 :tag "Column Width"))
-	     (link (integer :value 5 :tag "Column Width")))  
+	     (link (integer :value 5 :tag "Column Width"))
+  	     (id (integer :value 5 :tag "Column Width")))  
   :group 'pdf-annot)
 
 (defcustom pdf-annot-list-highlight-type nil
@@ -1605,6 +1607,7 @@ belong to the same page and A1 is displayed above/left of A2."
 	(text (replace-regexp-in-string  "- " "" (funcall prune-newlines
 							  (my-pdf-annot-gettext a))))
 	(link (replace-regexp-in-string  "\"\"" "\"" (my-pdf-annot-create-link a)))
+	(id (pdf-annot-print-property a 'id))
         (contents
          (truncate-string-to-width
           (funcall prune-newlines
@@ -1661,6 +1664,11 @@ belong to the same page and A1 is displayed above/left of A2."
   (interactive)
   (pdf-util-assert-pdf-buffer)
   (let ((buffer (current-buffer)))
+    (setq pdf-annot-list-format  '((page . 3)
+				   (date . 5)
+				   (contents . 10)
+				   (text . 25)
+				   ))
     (with-current-buffer (get-buffer-create
                           (format "*%s annots*"
                                   (file-name-sans-extension
@@ -1820,29 +1828,16 @@ belong to the same page and A1 is displayed above/left of A2."
   )
 
 ;; Export annotations
-(defcustom pdf-annot-export-format
-  '((page . 3)
-    (type . 10)
-    (label . 20)
-    (date . 24)
-    (text . 25)
-    (link . 5))
-  "Annotation properties visible in the annotation list.
+;; (setq pdf-annot-list-format
+;;   '((page . 3)
+;;     (type . 10)
+;;     (label . 20)
+;;     (date . 24)
+;;     (text . 25)
+;;     (content . 25)
+;;     (link . 5))
+;;   )
 
-It should be a list of \(PROPERTIZE. WIDTH\), where PROPERTY is a
-symbol naming one of supported properties to list and WIDTH its
-desired column-width.
-
-Currently supported properties are page, type, label, date and contents."
-  :type '(alist :key-type (symbol))
-  :options '((page (integer :value 3 :tag "Column Width"))
-             (type (integer :value 10 :tag "Column Width" ))
-             (label (integer :value 24 :tag "Column Width"))
-             (date (integer :value 24 :tag "Column Width"))
-             (contents (integer :value 56 :tag "Column Width"))
-             (text (integer :value 56 :tag "Column Width"))
-	     (link (integer :value 5 :tag "Column Width")))  
-  :group 'pdf-annot)
 
 (defun pdf-annot-save-annotations ()
   "List annotations in a dired like buffer.
@@ -1851,6 +1846,11 @@ Currently supported properties are page, type, label, date and contents."
   (interactive)
   (pdf-util-assert-pdf-buffer)
   (let ((buffer (current-buffer)))
+    (setq pdf-annot-list-format  '((page . 3)
+			      (date . 5)
+			      (text . 25)
+			      (contents . 25)
+			      (link . 5)))
     (with-current-buffer (get-buffer-create
                           (format "*%s annots*"
                                   (file-name-sans-extension
@@ -1873,8 +1873,50 @@ Currently supported properties are page, type, label, date and contents."
       (tablist-move-to-major-column)
       (tablist-display-context-window)
       (write-file (concat "/tmp/" (replace-regexp-in-string "\*" "" (buffer-name)) ".org"))
-      )
+      (kill-buffer))
     (add-hook 'pdf-info-close-document-hook
               'pdf-annot-list-update nil t)
     (add-hook 'pdf-annot-modified-functions
               'pdf-annot-list-update nil t)))
+
+;; (defun pdf-annot-list-save-create-entry (a)
+;;   "Create a `tabulated-list-entries' entry for annotation A."
+;;   (list (pdf-annot-get-id a)
+;;         (vconcat
+;;          (mapcar (pdf-annot--make-entry-formatter a)
+;;                  pdf-annot-save-format))))
+
+;; (define-derived-mode pdf-annot-save-mode tablist-mode "Annots"
+;;   (let* ((page-sorter
+;;           (lambda (a b)
+;;             (< (string-to-number (aref (cadr a) 0))
+;;                (string-to-number (aref (cadr b) 0)))))
+;;          (format-generator
+;;           (lambda (format)
+;;             (let ((field (car format))
+;;                   (width (cdr format)))
+;;               (cl-case field
+;;                 (page `("Pg." 3 ,page-sorter :read-only t :right-alight t))
+;;                 (t (list
+;;                     (capitalize (symbol-name field))
+;;                     width t :read-only t)))))))
+;;     (setq tabulated-list-entries 'pdf-annot-list-save-entries
+;;           tabulated-list-format (vconcat
+;;                                  (mapcar
+;;                                   format-generator
+;;                                   pdf-annot-save-format))
+;;           tabulated-list-padding 2))
+;;   (set-keymap-parent pdf-annot-list-mode-map tablist-mode-map)
+;;   (use-local-map pdf-annot-list-mode-map)
+;;   (when (assq 'type pdf-annot-save-format)
+;;     (setq tablist-current-filter
+;;           `(not (== "Type" "link"))))
+;;   (tabulated-list-init-header))
+
+;; (defun pdf-annot-list-save-entries ()
+;;   (unless (buffer-live-p pdf-annot-list-document-buffer)
+;;     (error "No PDF document associated with this buffer"))
+;;   (mapcar 'pdf-annot-list-save-create-entry
+;;           (sort (pdf-annot-getannots nil pdf-annot-list-listed-types
+;;                                      pdf-annot-list-document-buffer)
+;;                 'pdf-annot-compare-annotations)))
