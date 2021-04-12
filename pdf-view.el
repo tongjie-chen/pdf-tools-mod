@@ -1389,6 +1389,9 @@ Stores the region in `pdf-view-active-region'."
       (setq pdf-view-active-region
             (append pdf-view-active-region
                     (list region)))
+      ;; Add a popup menu here!!!
+      ;; Because active region with blank text, so this
+      (if (not (string-blank-p (car (pdf-view-active-region-text)))) (popup-menu pdf-quick-popup))
       (pdf-view--push-mark))))
 
 (defun pdf-view-mouse-extend-region (event)
