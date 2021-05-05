@@ -735,6 +735,7 @@ next page only on typing SPC (ARG is nil)."
           (pdf-view-next-page)
           (when (/= cur-page (pdf-view-current-page))
             (image-bob)
+	    ;; Add an arrow here
             (image-bol 1))
           (image-set-window-hscroll hscroll)))
     (image-scroll-up arg)))
