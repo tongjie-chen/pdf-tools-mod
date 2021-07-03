@@ -159,7 +159,9 @@ links via \\[pdf-links-isearch-link].
      (cl-case .type
        (goto-dest
         (if (> .page 0)
-            (format "Goto page %d" .page)
+            (concat  "  " ;; (format "Goto page %d" .page)
+		    (unless (null .top) (pdf-info-gettext .page (list 0 .top 1 .top ) 'word)))
+	  ;; My addition to get the text of the link target if within this document, this is ugly for two column
           "Destination not found"))
        (goto-remote
         (if (and .filename (file-exists-p .filename))
@@ -369,7 +371,7 @@ Wraps the URI in \[\[ ... \]\] and calls `org-open-link-from-string'
 on the resulting string."
   (cl-check-type uri string)
   (message "Opening `%s' with Org" uri)
-  (org-open-link-from-string (format "[[%s]]" uri)))
+  (org-link-open-from-string (format "[[%s]]" uri)))
 
 (provide 'pdf-links)
 
