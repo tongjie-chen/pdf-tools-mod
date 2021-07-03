@@ -160,7 +160,7 @@ links via \\[pdf-links-isearch-link].
        (goto-dest
         (if (> .page 0)
             (concat  "  " ;; (format "Goto page %d" .page)
-		    (unless (null .top) (pdf-info-gettext .page (list 0 .top 1 .top ) 'word)))
+		    (unless (null .top) (pdf-info-gettext .page (list 0 (max 0 .top) 1 (max 0 .top) ) 'word)))
 	  ;; My addition to get the text of the link target if within this document, this is ugly for two column
           "Destination not found"))
        (goto-remote
@@ -212,17 +212,21 @@ scroll the current page."
          (with-selected-window window
            (when (derived-mode-p 'pdf-view-mode)
              (when (> .page 0)
-               (pdf-view-goto-page .page))
+	       (if pdf-links-open-with-external
+		   (call-process-shell-command (concat "unset LD_LIBRARY_PATH; okular '" buffer-file-name "' -p " (number-to-string .page)) nil 0)
+               (pdf-view-goto-page .page)))
              (when .top
                ;; Showing the tooltip delays displaying the page for
                ;; some reason (sit-for/redisplay don't help), do it
                ;; later.
-               (run-with-idle-timer 0.001 nil
-                 (lambda ()
-                   (when (window-live-p window)
-                     (with-selected-window window
-                       (when (derived-mode-p 'pdf-view-mode)
-                         (pdf-util-tooltip-arrow .top)))))))))))
+	       (image-set-window-vscroll (* (max 0 .top) (cdr (pdf-view-image-size))))
+               ;; (run-with-idle-timer 0.001 nil
+               ;;   (lambda ()
+               ;;     (when (window-live-p window)
+               ;;       (with-selected-window window
+               ;;         (when (derived-mode-p 'pdf-view-mode)
+               ;;           (pdf-util-tooltip-arrow .top))))))
+	       )))))
       (uri
        (funcall pdf-links-browse-uri-function .uri))
       (t
