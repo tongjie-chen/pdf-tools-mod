@@ -613,7 +613,11 @@ match."
 
 (defun pdf-isearch-focus-match-isearch (match)
   "Make the image area in MATCH visible in the selected window."
-  (pdf-util-scroll-to-edges (apply 'pdf-util-edges-union match)))
+  ;; TODO 
+  (pdf-util-scroll-to-edges (apply 'pdf-util-edges-union match))
+  (unless (null match)
+    (image-set-window-vscroll (max (- (elt (car match) 1) 100) 0)))
+  )
 
 (defun pdf-isearch-next-match-batch (last-page this-page last-match
                                                matches same-search-p
@@ -720,6 +724,11 @@ MATCH-BG LAZY-FG LAZY-BG\)."
 (defun pdf-isearch-hl-matches (current matches &optional occur-hack-p)
   "Highlighting edges CURRENT and MATCHES."
   (cl-check-type current pdf-isearch-match)
+  ;; Add a jump here TODO
+  ;; (unless (null current)
+  ;;   (image-set-window-vscroll (elt current 1)))
+  ;; Not here. Need to find how it goes to the first search
+  ;; This function just find the matches and put to a list or something
   (cl-check-type matches (list-of pdf-isearch-match))
   (cl-destructuring-bind (fg1 bg1 fg2 bg2)
       (pdf-isearch-current-colors)
