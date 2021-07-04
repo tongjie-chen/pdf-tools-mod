@@ -451,11 +451,11 @@ needed."
           (if (> (min image-width
                       edges-right)
                  (+ image-left win-width))
-              (round (/ (min (- image-width win-width)
+              (round (min (- image-width win-width)
                              (if eager-p
                                  edges-left
                                (- edges-right win-width)))
-                        (frame-char-width)))))))))
+                        )))))))
 
 (defun pdf-util-required-vscroll (edges &optional eager-p context-pixel)
   "Return the amount of scrolling necessary, to make image EDGES visible.
@@ -492,11 +492,11 @@ needed."
           (if (> (min image-height
                       edges-bot)
                  (+ image-top win-height))
-              (round (/ (min (- image-height win-height)
+              (round (min (- image-height win-height)
                              (if eager-p
                                  edges-top
-                               (- edges-bot win-height)))
-                        (float (frame-char-height))))))))))
+                               (- edges-bot win-height))))
+                        ))))))
 
 (defun pdf-util-scroll-to-edges (edges &optional eager-p)
   "Scroll window such that image EDGES are visible.
