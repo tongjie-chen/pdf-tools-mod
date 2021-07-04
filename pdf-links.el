@@ -90,6 +90,10 @@ do something with it."
   :group 'pdf-links
   :type 'function)
 
+(defvar my-pdf-view-link-image-preview t
+  "Whether to generate image preview"
+  )
+
 
 ;; * ================================================================== *
 ;; * Minor Mode
@@ -159,8 +163,15 @@ links via \\[pdf-links-isearch-link].
      (cl-case .type
        (goto-dest
         (if (> .page 0)
-            (concat  "  " ;; (format "Goto page %d" .page)
-		    (unless (null .top) (pdf-info-gettext .page (list 0 (max 0 .top) 1 (max 0 .top) ) 'word)))
+	    (if (derived-mode-p 'pdf-view-mode)
+		(if (and my-pdf-view-link-image-preview (> .top 0))
+		    (propertize " " 'display (list 'image :type 'png :data (pdf-info-renderpage
+									    .page 1500
+									    :crop-to (list 0.05 .top 0.95 (+ .top 0.1)))))
+		  (concat  "  "
+			   (unless (null .top) (pdf-info-gettext .page (list 0 (max 0 .top) 1 (max 0 .top) ) 'word)))
+		  )
+	      (format "Goto page %d" .page))
 	  ;; My addition to get the text of the link target if within this document, this is ugly for two column
           "Destination not found"))
        (goto-remote
@@ -219,6 +230,7 @@ scroll the current page."
                ;; Showing the tooltip delays displaying the page for
                ;; some reason (sit-for/redisplay don't help), do it
                ;; later.
+	       ;; image scroll the target location to the top of the buffer
 	       (image-set-window-vscroll (* (max 0 .top) (cdr (pdf-view-image-size))))
                ;; (run-with-idle-timer 0.001 nil
                ;;   (lambda ()
