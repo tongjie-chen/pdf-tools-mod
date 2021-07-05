@@ -364,6 +364,7 @@ See also `pdf-info-renderpage-highlight' and
        (let ((sign 1)
              (incr 1))
          (mapcar (lambda (_)
+		   (setq page (if (null page) 0)) ; Page was null before the next operation
                    (setq page (+ page (* sign incr))
                          sign (- sign)
                          incr (1+ incr))
