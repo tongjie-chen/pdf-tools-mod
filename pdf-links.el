@@ -165,9 +165,16 @@ links via \\[pdf-links-isearch-link].
         (if (> .page 0)
 	    (if (derived-mode-p 'pdf-view-mode)
 		(if (and my-pdf-view-link-image-preview (> .top 0))
-		    (propertize " " 'display (list 'image :type 'png :data (pdf-info-renderpage
-									    .page 1500
-									    :crop-to (list 0.05 .top 0.95 (+ .top 0.1)))))
+		    ;; (propertize " " 'display (list 'image :type 'png :data (pdf-info-renderpage
+		    ;; 							    .page 1500
+		    ;; 							    :crop-to (list 0.05 .top 0.95 (min (+ .top 0.1) 1)))))
+		    (propertize " " 'display (list 'image :type 'png :data (pdf-cache-renderpage
+									    .page 2000)
+						   'slice 0 .top 1 0.1
+						   )
+				)
+		  ;; +Not successful with this slice yet+. Successfully done
+		    
 		  (concat  "  "
 			   (unless (null .top) (pdf-info-gettext .page (list 0 (max 0 .top) 1 (max 0 .top) ) 'word)))
 		  )
